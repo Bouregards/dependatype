@@ -233,7 +233,17 @@ export class ContainerInstance implements IContainerInstance {
 
     this._initResolve(resolvable);
 
+    const {key} = this._generateName(resolvable);
+
+    if (key in this.resolveMap.resolved) {
+      const search = this.resolveMap.resolved[key].find((v) => v.target === resolvable) as ResolvedInstance<T> | undefined;
+      if (search) {
+        return async ? Promise.resolve(search.instance) : search.instance;
+      }
+    }
+
     const resolveConfig = this._getResolver(resolvable);
+    
 
     if (resolveConfig.async) {
       if (!async) {
